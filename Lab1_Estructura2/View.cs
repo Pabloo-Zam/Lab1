@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace Lab1_Estructura2
 {
-    internal class Program
+    internal class View
     {
         static void Main(string[] args)
         {
+
         }
     }
 }
