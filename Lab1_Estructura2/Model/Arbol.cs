@@ -37,18 +37,18 @@ namespace Lab1_Estructura2.Model
             return Nleft;
         }
         //ROTACION IZQUIERDA
-        private Node RotarIzquierda(Node x)
+        private Node RotarIzquierda(Node node)
         {
-            Node y = x.der;
-            Node T2 = y.iz;
+            Node NRight = node.der;
+            Node Nleft = NRight.iz;
 
-            y.iz = x;
-            x.der = T2;
+            NRight.iz = node;
+            node.der = Nleft;
 
-            x.altura = Math.Max(Altura(x.iz), Altura(x.der)) + 1;
-            y.altura = Math.Max(Altura(y.iz), Altura(y.der)) + 1;
+            node.altura = Math.Max(Altura(node.iz), Altura(node.der)) + 1;
+            NRight.altura = Math.Max(Altura(NRight.iz), Altura(NRight.der)) + 1;
 
-            return y;
+            return NRight;
         }
         //FUNCION INSERTAR
         public Node Insertar(Node node, UsuarioModel dato)
