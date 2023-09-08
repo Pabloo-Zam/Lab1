@@ -217,6 +217,7 @@ namespace Lab1_Estructura2.Model
                     Actualizar(node.der, dato);
                 }
             }
+            return node;
         }
 
         private List<UsuarioModel> buscar(string nombre, Node nodo)
