@@ -51,6 +51,10 @@ namespace Lab1_Estructura2.Model
             return NRight;
         }
         //FUNCION INSERTAR
+        public void Insertar(UsuarioModel dato)
+        {
+            raiz = Insertar(raiz,dato);
+        }
         public Node Insertar(Node node, UsuarioModel dato)
         {
             if (node == null)
@@ -110,6 +114,10 @@ namespace Lab1_Estructura2.Model
             return actual;
         }
         //FUNCION ELIMINAR
+        public void BuscaElimina(UsuarioModel dato)
+        {
+            raiz = Eliminar(raiz, dato);
+        }
         public Node Eliminar(Node node, UsuarioModel dato)
         {
             if (node == null)
@@ -181,28 +189,78 @@ namespace Lab1_Estructura2.Model
             return node;
         }
         //FUNCION ACTUALIZAR 
-        public Node Actualizar(Node node, UsuarioModel oldData, UsuarioModel newData)
+        public void actual(UsuarioModel dato)
         {
-            node = Eliminar(node, oldData);
-            node = Insertar(node, newData);
-            return node;
+            raiz = Actualizar(raiz,dato);
+        }
+        public Node Actualizar(Node node, UsuarioModel dato)
+        {
+            if (node != null)
+            {
+                if (node.dato.nombre == dato.nombre)
+                {
+                    for (int i = 0; i < node.lista.Count(); i++)
+                    {
+                        if (node.lista[i].dpi == dato.dpi)
+                        {
+                            node.lista[i] = dato;
+                            break;
+                        }
+                    }
+                }
+                else if (dato.nombre.CompareTo(node.dato.nombre) < 0)
+                {
+                    Actualizar(node.iz,dato);
+                }
+                else if (dato.nombre.CompareTo(node.dato.nombre) > 0)
+                {
+                    Actualizar(node.der, dato);
+                }
+            }
         }
 
-        public Node Buscar(Node node, UsuarioModel dato)
+        private List<UsuarioModel> buscar(string nombre, Node nodo)
         {
-            if (node == null || node.dato == dato)
-                return node;
-
-            if (dato.nombre.CompareTo(node.dato.nombre)<0)
-                return Buscar(node.iz, dato);
-
-            return Buscar(node.der, dato);
+            if (nodo == null)
+            {
+                return null;
+            }
+            if (nodo.dato.nombre == nombre)
+            {
+                return nodo.lista;
+            }
+            else if (nombre.CompareTo(nodo.dato.nombre) < 0)
+            {
+                return buscar(nombre, nodo.iz);
+            }
+            else if (nombre.CompareTo(nodo.dato.nombre) > 0)
+            {
+                return buscar(nombre, nodo.der);
+            }
+            return null;
         }
 
-        public Node Buscar(UsuarioModel dato)
+        public List<UsuarioModel> busqueda(string nombre)
         {
-            return Buscar(raiz, dato);
+            return buscar(nombre, raiz);
         }
+        private List<UsuarioModel> InOrderAVL(Node nodoActual)
+        {
+            List<UsuarioModel> nodosInOrder = new List<UsuarioModel>();
+
+            if (nodoActual != null)
+            {
+                nodosInOrder.AddRange(InOrderAVL(nodoActual.iz));
+                nodosInOrder.AddRange(nodoActual.lista);
+                nodosInOrder.AddRange(InOrderAVL(nodoActual.der));
+            }
+            return nodosInOrder;
+        }
+        public List<UsuarioModel> listaOrdenada()
+        {
+            return InOrderAVL(raiz);
+        }
+
     }
 
    
