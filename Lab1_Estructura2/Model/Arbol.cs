@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Lab1_Estructura2.Model
 {
@@ -51,30 +52,38 @@ namespace Lab1_Estructura2.Model
             return NRight;
         }
         //FUNCION INSERTAR
-        public void Insertar(UsuarioModel dato)
+        public void Insertar(UsuarioModel usuario)
         {
-            raiz = Insertar(raiz,dato);
+            if (usuario != null && usuario.nombre != null)
+            {
+                int dato = usuario.nombre.GetHashCode(); // Puedes usar el hash del nombre como dato
+                raiz = Insertar(raiz, dato, usuario);
+            }
         }
-        public Node Insertar(Node node, UsuarioModel dato)
+
+        private Node Insertar(Node node, int dato, UsuarioModel usuario)
         {
+
             if (node == null)
             {
-                return new Node(dato);
+                Node newNode = new Node(dato);
+                newNode.lista.Add(usuario);
+                return newNode;
+
             }
 
-            if (dato.nombre.CompareTo(node.dato.nombre) < 0)
+            if (dato < node.dato)
             {
-                node.iz = Insertar(node.iz, dato);
-                node.iz.padre = node;
+                node.iz = Insertar(node.iz, dato, usuario);
             }
-            else if (dato.nombre.CompareTo(node.dato.nombre)>0)
+            else if (dato > node.dato)
             {
-                node.der = Insertar(node.der, dato);
-                node.der.padre = node;
+                node.der = Insertar(node.der, dato, usuario);
             }
             else
             {
                 // Valor duplicado, si es necesario, maneja la lógica aquí
+                node.lista.Add(usuario);
                 return node;
             }
 
@@ -85,7 +94,7 @@ namespace Lab1_Estructura2.Model
             // Casos de rotación
             if (balance > 1)
             {
-                if (dato.nombre.CompareTo(node.iz.dato.nombre)<0)
+                if (dato < node.iz.dato)
                     return RotarDerecha(node);
                 else
                 {
@@ -95,7 +104,7 @@ namespace Lab1_Estructura2.Model
             }
             if (balance < -1)
             {
-                if (dato.nombre.CompareTo(node.der.dato.nombre)<=1)
+                if (dato > node.der.dato)
                     return RotarIzquierda(node);
                 else
                 {
@@ -106,6 +115,7 @@ namespace Lab1_Estructura2.Model
 
             return node;
         }
+
         private Node EncontrarMinimo(Node node)
         {
             Node actual = node;
@@ -114,61 +124,63 @@ namespace Lab1_Estructura2.Model
             return actual;
         }
         //FUNCION ELIMINAR
-        public void BuscaElimina(UsuarioModel dato)
+        public void EliminarUsuarioPorNombre(string nombre)
         {
-            raiz = Eliminar(raiz, dato);
+            raiz = EliminarUsuarioPorNombre(raiz, nombre);
         }
-        public Node Eliminar(Node node, UsuarioModel dato)
+        private Node EliminarUsuarioPorNombre(Node node, string nombre)
         {
             if (node == null)
             {
+                // No se encontró el nodo, no se hace ninguna acción
                 return node;
             }
-            //ELIMINACION RECURSIVA
-            if (dato.nombre.CompareTo(node.dato.nombre) < 0)
+            if (nombre.CompareTo(node.lista[0].nombre) < 0)
             {
-                node.iz = Eliminar(node.iz, dato);
+                // El nombre está en el subárbol izquierdo
+                node.iz = EliminarUsuarioPorNombre(node.iz, nombre);
             }
-            else if (dato.nombre.CompareTo(node.dato.nombre) > 0)
+            else if (nombre.CompareTo(node.lista[0].nombre) > 0)
             {
-                node.der = Eliminar(node.der, dato);
+                // El nombre está en el subárbol derecho
+                node.der = EliminarUsuarioPorNombre(node.der, nombre);
             }
             else
             {
-                if ((node.iz == null) || (node.der == null))
+                // Se encontró el nombre, elimina el nodo o ajusta la lista de usuarios según tus necesidades
+                if (node.lista.Count > 1)
                 {
-                    Node temp = (node.iz != null) ? node.iz : node.der;
-
-                    if (temp == null)
-                    {
-                        temp = node;
-                        node = null;
-                    }
-                    else
-                    {
-                        node = temp;
-                    }
+                    node.lista.RemoveAt(0);
                 }
                 else
                 {
-                    Node temp = EncontrarMinimo(node.der);
-                    node.dato = temp.dato;
-                    node.der = Eliminar(node.der, temp.dato);
+                    // Si solo hay un usuario con el nombre, elimina el nodo completo
+                    if (node.iz == null)
+                        return node.der;
+                    else if (node.der == null)
+                        return node.iz;
+                    // Nodo con dos hijos, obtén el sucesor inorden (nodo más pequeño en el subárbol derecho)
+                    Node sucesor = EncontrarMinimo(node.der);
+
+                    // Copia los datos del sucesor a este nodo
+                    node.lista[0] = sucesor.lista[0];
+
+                    // Elimina el sucesor
+                    node.der = EliminarUsuarioPorNombre(node.der, sucesor.lista[0].nombre);
                 }
             }
-
-            if (node == null)
-                return node;
-
+            // Actualiza la altura del nodo
             node.altura = 1 + Math.Max(Altura(node.iz), Altura(node.der));
-
+            // Calcula el factor de equilibrio
             int balance = FactorBalance(node);
 
-            // Casos de rotación
+            // Casos de rotación si es necesario
             if (balance > 1)
             {
-                if (FactorBalance(node.iz) >= 0)
+                if (nombre.CompareTo(node.iz.lista[0].nombre) < 0)
+                {
                     return RotarDerecha(node);
+                }
                 else
                 {
                     node.iz = RotarIzquierda(node.iz);
@@ -177,78 +189,125 @@ namespace Lab1_Estructura2.Model
             }
             if (balance < -1)
             {
-                if (FactorBalance(node.der) <= 0)
+                if (nombre.CompareTo(node.der.lista[0].nombre) > 0)
+                {
                     return RotarIzquierda(node);
+                }
                 else
                 {
                     node.der = RotarDerecha(node.der);
                     return RotarIzquierda(node);
                 }
             }
+            return node;
 
+        }
+
+        //FUNCION ACTUALIZAR 
+        public void ActualizarUsuarioPorNombre(string nombre, UsuarioModel nuevoUsuario)
+        {
+            raiz = ActualizarUsuarioPorNombre(raiz, nombre, nuevoUsuario);
+        }
+        private Node ActualizarUsuarioPorNombre(Node node, string nombre, UsuarioModel nuevoUsuario)
+        {
+
+            if (node == null)
+            {
+                // No se encontró el nodo, no se hace ninguna acción
+                return node;
+            }
+            if (nombre.CompareTo(node.lista[0].nombre) < 0)
+            {
+                // El nombre está en el subárbol izquierdo
+                node.iz = ActualizarUsuarioPorNombre(node.iz, nombre, nuevoUsuario);
+            }
+            else if (nombre.CompareTo(node.lista[0].nombre) > 0)
+            {
+                // El nombre está en el subárbol derecho
+                node.der = ActualizarUsuarioPorNombre(node.der, nombre, nuevoUsuario);
+
+            }
+            else
+            {
+                // Se encontró el nombre, actualiza la lista de usuarios
+                node.lista.Clear();
+                node.lista.Add(nuevoUsuario);
+            }
+            node.altura = 1 + Math.Max(Altura(node.iz), Altura(node.der));
+
+            // Calcula el factor de equilibrio
+            int balance = FactorBalance(node);
+
+
+
+            // Casos de rotación si es necesario
+            if (balance > 1)
+            {
+                if (nombre.CompareTo(node.iz.lista[0].nombre) < 0)
+                {
+                    return RotarDerecha(node);
+                }
+                else
+                {
+                    node.iz = RotarIzquierda(node.iz);
+                    return RotarDerecha(node);
+                }
+            }
+            if (balance < -1)
+            {
+                if (nombre.CompareTo(node.der.lista[0].nombre) > 0)
+                {
+                    return RotarIzquierda(node);
+                }
+                else
+                {
+                    node.der = RotarDerecha(node.der);
+                    return RotarIzquierda(node);
+                }
+            }
             return node;
         }
-        //FUNCION ACTUALIZAR 
-        public void actual(UsuarioModel dato)
+        public Node Buscar(Node node, int dato)
         {
-            raiz = Actualizar(raiz,dato);
+            if (node == null || node.dato == dato)
+                return node;
+
+            if (dato < node.dato)
+                return Buscar(node.iz, dato);
+
+            return Buscar(node.der, dato);
         }
-        public Node Actualizar(Node node, UsuarioModel dato)
+        public List<UsuarioModel> BuscarPorNombre(string nombre)
+        {
+            List<UsuarioModel> resultados = new List<UsuarioModel>();
+            BuscarPorNombre(raiz, nombre, resultados);
+            return resultados;
+        }
+        private void BuscarPorNombre(Node node, string nombre, List<UsuarioModel> resultados)
         {
             if (node != null)
             {
-                if (node.dato.nombre == dato.nombre)
+                // Busca el nombre en la lista de usuarios en este nodo
+                foreach (var usuario in node.lista)
                 {
-                    for (int i = 0; i < node.lista.Count(); i++)
+                    if (usuario.nombre == nombre)
                     {
-                        if (node.lista[i].dpi == dato.dpi)
-                        {
-                            node.lista[i] = dato;
-                            break;
-                        }
+                        resultados.Add(usuario);
                     }
                 }
-                else if (dato.nombre.CompareTo(node.dato.nombre) < 0)
-                {
-                    Actualizar(node.iz,dato);
-                }
-                else if (dato.nombre.CompareTo(node.dato.nombre) > 0)
-                {
-                    Actualizar(node.der, dato);
-                }
-            }
-            return node;
-        }
 
-        private List<UsuarioModel> buscar(string nombre, Node nodo)
-        {
-            if (nodo == null)
-            {
-                return null;
+                // Luego busca en los subárboles izquierdo y derecho
+                BuscarPorNombre(node.iz, nombre, resultados);
+                BuscarPorNombre(node.der, nombre, resultados);
             }
-            if (nodo.dato.nombre == nombre)
-            {
-                return nodo.lista;
-            }
-            else if (nombre.CompareTo(nodo.dato.nombre) < 0)
-            {
-                return buscar(nombre, nodo.iz);
-            }
-            else if (nombre.CompareTo(nodo.dato.nombre) > 0)
-            {
-                return buscar(nombre, nodo.der);
-            }
-            return null;
         }
-
-        public List<UsuarioModel> busqueda(string nombre)
+        public List<UsuarioModel> listaOrdenada()
         {
-            return buscar(nombre, raiz);
+            return InOrderAVL(raiz);
         }
         private List<UsuarioModel> InOrderAVL(Node nodoActual)
         {
             List<UsuarioModel> nodosInOrder = new List<UsuarioModel>();
-
             if (nodoActual != null)
             {
                 nodosInOrder.AddRange(InOrderAVL(nodoActual.iz));
@@ -257,12 +316,7 @@ namespace Lab1_Estructura2.Model
             }
             return nodosInOrder;
         }
-        public List<UsuarioModel> listaOrdenada()
-        {
-            return InOrderAVL(raiz);
-        }
+
 
     }
-
-   
 }

@@ -8,15 +8,15 @@ namespace Lab1_Estructura2.Model
 {
     public class Node
     {
-        public Node(UsuarioModel user) {
-            dato = user;
+        public Node(int data) {
+            dato = data;
             iz = null;
             der = null;
             padre = null;
-            lista = new List<UsuarioModel> {user};
+            //lista = new List<UsuarioModel> {data};
             this.altura = 0;
         }
-        public UsuarioModel dato { get; set; }
+        public int dato { get; set; }
         public Node iz { get; set; }
         public Node der { get; set; }
         public Node padre { get; set; }
