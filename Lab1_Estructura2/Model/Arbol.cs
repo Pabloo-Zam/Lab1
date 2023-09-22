@@ -7,6 +7,11 @@ using System.Xml.Linq;
 
 namespace Lab1_Estructura2.Model
 {
+    public class CompressedCompany
+    {
+        public string CompressedData { get; set; }
+    }
+
     public class Arbol
     {
         public Node raiz;
@@ -370,6 +375,8 @@ namespace Lab1_Estructura2.Model
                 return BuscarPorNombreDPI(node.der, nombre, dpi); // Buscar en el subárbol derecho
             }
         }
+
+
     }
 
     

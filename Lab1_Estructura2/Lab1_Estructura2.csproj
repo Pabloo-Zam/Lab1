@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Controller\Usuario.cs" />
     <Compile Include="Model\Arbol.cs" />
+    <Compile Include="Model\LZ77.cs" />
     <Compile Include="Model\Node.cs" />
     <Compile Include="Model\UsuarioModel.cs" />
     <Compile Include="View.cs" />

@@ -10,6 +10,12 @@ using System.Runtime.Remoting.Messaging;
 
 namespace Lab1_Estructura2
 {
+    public class CompressedCompany
+    {
+        public string CompressedData { get; set; }
+    }
+    
+
     public class View
     {
         //public static string jsonData;
@@ -85,10 +91,28 @@ namespace Lab1_Estructura2
                 Console.WriteLine("Error al eliminar: " + ex.Message);
             }
         }
+        //FUNCION LZ77
+        private static CompressedCompany ComprimirCompanies(List<string> companies)
+        {
+            // Convierte la lista de empresas en una cadena de texto
+            string companiesTexto = string.Join(",", companies);
+
+            // Aplica el algoritmo LZ77 para comprimir los datos
+            string companiesComprimidas = LZ77.Comprimir(companiesTexto);
+
+            // Crea un objeto CompressedCompany para almacenar los datos comprimidos
+            CompressedCompany compressedCompany = new CompressedCompany
+            {
+                CompressedData = companiesComprimidas
+            };
+
+            return compressedCompany;
+        }
         static void Main(string[] args)
         {
             // Crea un árbol AVL
             Arbol arbol = new Arbol();
+            List<string> companies = new List<string>(); 
 
             // Lee el archivo CSV
             string csvFilePath = "D:\\Desktop\\2do ciclo 2023\\Estructura de datos II\\datos.txt";
@@ -128,7 +152,7 @@ namespace Lab1_Estructura2
                     Console.WriteLine("Formato incorrecto en la línea: " + line);
                 }
             }
-
+            CompressedCompany compressedCompany = View.ComprimirCompanies(companies);
             while (true)
             {
                 Console.Write("Ingrese un dpi para buscar (o 'salir' para salir): ");
@@ -147,6 +171,12 @@ namespace Lab1_Estructura2
                     foreach (var usuario in resultados)
                     {
                         Console.WriteLine($"Nombre: {usuario.nombre}, DPI: {usuario.dpi}, Fecha de Nacimiento: {usuario.nacimiento}, Dirección: {usuario.direccion}");
+                        if (usuario.companies != null && usuario.companies.Any())
+                        {
+                            Console.WriteLine("Companies Codificadas:");
+                            CompressedCompany compressedCompanies = ComprimirCompanies(usuario.companies);
+                            Console.WriteLine(compressedCompanies.CompressedData);
+                        }
                     }
                 }
             }

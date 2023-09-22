@@ -17,6 +17,8 @@ namespace Lab1_Estructura2.Model
         public string nacimiento { get; set; }
         [JsonProperty("address")]
         public string direccion { get; set; }
+        public List<string> companies { get; set; }
+
         public int CompareTo(UsuarioModel other)
         {
             if (this == null && other == null)
