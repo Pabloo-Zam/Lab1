@@ -43,24 +43,13 @@ namespace Lab1_Estructura2
 
                 if (usuario != null)
                 {
-                    // Llamamos al método BuscarPorNombreDPI para encontrar el registro existente.
-                    UsuarioModel usuarioExistente = arbol.BuscarPorNombreDPI(usuario.nombre, usuario.dpi);
-
-                    if (usuarioExistente != null)
-                    {
-                        // Realizamos la actualización eliminando el registro existente y agregando el nuevo.
-                        arbol.Eliminar(usuarioExistente.nombre, usuarioExistente.dpi);
-                        arbol.Insertar(usuario);
-                        //Console.WriteLine("Registro actualizado exitosamente.");
-                    }
-                    else
-                    {
-                        //Console.WriteLine("No se encontró un registro con el nombre y DPI proporcionados.");
-                    }
+                    // Llamamos al método ActualizarPorNombreDPI para realizar la actualización
+                    arbol.BuscarPorNombreDPI(usuario);
+                    //Console.WriteLine("Registro actualizado exitosamente.");
                 }
                 else
                 {
-                    //Console.WriteLine("No se pudo actualizar el registro.");
+                    Console.WriteLine("No se pudo actualizar el registro.");
                 }
             }
             catch (Exception ex)
@@ -74,17 +63,18 @@ namespace Lab1_Estructura2
         {
             try
             {
-                
                 UsuarioModel usuario = JsonConvert.DeserializeObject<UsuarioModel>(jsonData);
+
                 if (usuario != null)
                 {
-                    // Llamamos al método Eliminar del árbol pasando el nombre y DPI del usuario.
+                    // Llamamos al método EliminarPorNombreDPI para eliminar el registro existente
                     arbol.Eliminar(usuario.nombre, usuario.dpi);
+                    //Console.WriteLine("Registro eliminado exitosamente.");
                 }
-                else {
-                    //Console.WriteLine("No se pudo eliminar el registro");
+                else
+                {
+                    Console.WriteLine("No se pudo eliminar el registro.");
                 }
-
             }
             catch (Exception ex)
             {
@@ -115,7 +105,7 @@ namespace Lab1_Estructura2
             List<string> companies = new List<string>(); 
 
             // Lee el archivo CSV
-            string csvFilePath = "D:\\Desktop\\2do ciclo 2023\\Estructura de datos II\\datos.txt";
+            string csvFilePath = "D:\\Desktop\\2do ciclo 2023\\Estructura de datos II\\input1.csv";
 
             // Lee cada línea del archivo CSV
             foreach (string line in File.ReadLines(csvFilePath))

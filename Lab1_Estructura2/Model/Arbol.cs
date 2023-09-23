@@ -11,7 +11,6 @@ namespace Lab1_Estructura2.Model
     {
         public string CompressedData { get; set; }
     }
-
     public class Arbol
     {
         public Node raiz;
@@ -346,33 +345,41 @@ namespace Lab1_Estructura2.Model
             BuscarPorDPI(node.der, dpi, resultados);
         }
         //BUSQUEDA PARA ACTUALIZAR
-        public UsuarioModel BuscarPorNombreDPI(string nombre, string dpi)
+        public void BuscarPorNombreDPI(UsuarioModel nuevoDato)
         {
-            return BuscarPorNombreDPI(raiz, nombre, dpi);
+            if (nuevoDato != null && nuevoDato.nombre != null && nuevoDato.dpi != null)
+            {
+                // Realizar la búsqueda por nombre y DPI
+                List<UsuarioModel> resultados = new List<UsuarioModel>();
+                BuscarPorNombreDPI(raiz, nuevoDato.nombre, nuevoDato.dpi, resultados);
+
+                // Eliminar los registros encontrados
+                foreach (UsuarioModel registroExistente in resultados)
+                {
+                    Eliminar(registroExistente.nombre, registroExistente.dpi);
+                }
+
+                // Insertar el nuevo registro actualizado
+                Insertar(nuevoDato);
+            }
         }
 
-        private UsuarioModel BuscarPorNombreDPI(Node node, string nombre, string dpi)
+        private void BuscarPorNombreDPI(Node node, string nombre, string dpi, List<UsuarioModel> resultados)
         {
-            if (node == null)
+            if (node != null)
             {
-                return null; // El registro no se encontró
-            }
+                // Buscar coincidencia por nombre y DPI en la lista de usuarios en este nodo
+                foreach (var usuario in node.lista)
+                {
+                    if (usuario.nombre == nombre && usuario.dpi == dpi)
+                    {
+                        resultados.Add(usuario);
+                    }
+                }
 
-            // Compara el nombre y el DPI del nodo actual con los valores buscados
-            int nombreComparison = string.Compare(node.lista[0].nombre, nombre, StringComparison.OrdinalIgnoreCase);
-            int dpiComparison = string.Compare(node.lista[0].dpi, dpi, StringComparison.OrdinalIgnoreCase);
-
-            if (nombreComparison == 0 && dpiComparison == 0)
-            {
-                return node.lista[0]; // Se encontró el registro
-            }
-            else if (nombreComparison > 0 || (nombreComparison == 0 && dpiComparison > 0))
-            {
-                return BuscarPorNombreDPI(node.iz, nombre, dpi); // Buscar en el subárbol izquierdo
-            }
-            else
-            {
-                return BuscarPorNombreDPI(node.der, nombre, dpi); // Buscar en el subárbol derecho
+                // Luego buscar en los subárboles izquierdo y derecho
+                BuscarPorNombreDPI(node.iz, nombre, dpi, resultados);
+                BuscarPorNombreDPI(node.der, nombre, dpi, resultados);
             }
         }
 
