@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.IO;
 using System.Runtime.Remoting.Messaging;
+using Microsoft.Win32;
 
 namespace Lab1_Estructura2
 {
@@ -98,6 +99,33 @@ namespace Lab1_Estructura2
 
             return compressedCompany;
         }
+        static void DecodificarCompanies(UsuarioModel usuario)
+        {
+            try
+            {
+                // Decodificar las companies de usuario
+                List<string> companiesDecodificadas = new List<string>();
+
+                foreach (string companyCodificada in usuario.companies)
+                {
+                    string companyDecodificada = LZ77.Descomprimir(companyCodificada);
+                    companiesDecodificadas.Add(companyDecodificada);
+                }
+
+                // Imprimir las companies decodificadas
+                Console.WriteLine("Companies decodificadas:");
+                foreach (string company in companiesDecodificadas)
+                {
+                    Console.WriteLine(company);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al decodificar las companies: " + ex.Message);
+            }
+        }
+
+
         static void Main(string[] args)
         {
             // Crea un árbol AVL
@@ -157,18 +185,39 @@ namespace Lab1_Estructura2
                 }
                 else
                 {
-                    Console.WriteLine("Registros asociados a " + dpi + ":");
-                    foreach (var usuario in resultados)
+                    Console.WriteLine("Que desea hacer?");
+                    Console.WriteLine("1.Codificacion");
+                    Console.WriteLine("2.Decodificacion");
+                    int action = Convert.ToInt32(Console.ReadLine());
+                    if (action == 1)
                     {
-                        Console.WriteLine($"Nombre: {usuario.nombre}, DPI: {usuario.dpi}, Fecha de Nacimiento: {usuario.nacimiento}, Dirección: {usuario.direccion}");
-                        if (usuario.companies != null && usuario.companies.Any())
+                        Console.WriteLine("Registros asociados a " + dpi + ":");
+                        foreach (var usuario in resultados)
                         {
-                            Console.WriteLine("Companies Codificadas:");
-                            CompressedCompany compressedCompanies = ComprimirCompanies(usuario.companies);
-                            Console.WriteLine(compressedCompanies.CompressedData);
+                            Console.WriteLine($"Nombre: {usuario.nombre}, DPI: {usuario.dpi}, Fecha de Nacimiento: {usuario.nacimiento}, Dirección: {usuario.direccion}");
+                            if (usuario.companies != null && usuario.companies.Any())
+                            {
+                                Console.WriteLine("Companies Codificadas:");
+                                CompressedCompany compressedCompanies = ComprimirCompanies(usuario.companies);
+                                Console.WriteLine(compressedCompanies.CompressedData);
+                            }
                         }
                     }
+                    else if (action == 2)
+                    {
+                        foreach (var usuario in resultados)
+                        {
+                            Console.WriteLine($"Nombre: {usuario.nombre}, DPI: {usuario.dpi}, Fecha de Nacimiento: {usuario.nacimiento}, Dirección: {usuario.direccion}");
+
+                            // Decodificar y mostrar las companies
+                            DecodificarCompanies(usuario);
+                        }
+                    }
+                    else {
+                        Console.WriteLine("Accion lo valida");
+                    }
                 }
+                Console.WriteLine("--------------------------------------------------------------------");
             }
             Console.ReadKey();
         }
