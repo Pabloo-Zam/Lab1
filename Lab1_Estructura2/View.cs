@@ -125,17 +125,23 @@ namespace Lab1_Estructura2
             }
         }
 
-
+        static string CifrarContenido(string contenido)
+        {
+            // Lógica de cifrado aquí
+            // Implementa tu algoritmo de cifrado personalizado
+            return contenido; // En este ejemplo, no se realiza ningún cifrado
+        }
         static void Main(string[] args)
         {
             // Crea un árbol AVL
             Arbol arbol = new Arbol();
-            List<string> companies = new List<string>(); 
+            List<string> companies = new List<string>();
+            string carpeta = @"D:\Desktop\2do ciclo 2023\Estructura de datos II\inputs";
+            string carpetaOutput = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\Output";
 
-            // Lee el archivo CSV
-            string csvFilePath = "D:\\Desktop\\2do ciclo 2023\\Estructura de datos II\\input1.csv";
+            string csvFilePath = "D:\\Desktop\\2do ciclo 2023\\Estructura de datos II\\input2.csv";
 
-            // Lee cada línea del archivo CSV
+            
             foreach (string line in File.ReadLines(csvFilePath))
             {
                 string[] parts = line.Split(';');
@@ -179,6 +185,70 @@ namespace Lab1_Estructura2
                     break;
 
                 List<UsuarioModel> resultados = arbol.BuscarPorDPI(dpi);
+
+                try
+                {
+                    List<string> nombresArchivos = Directory.GetFiles(carpeta, "*.txt")
+                    .Select(Path.GetFileName)
+                    .ToList();
+
+                    List<string> nombresArchivosCoincidentes = nombresArchivos
+                .Where(nombreArchivo => nombreArchivo.Contains("-" + dpi + "-"))
+                .ToList();
+
+                    if (nombresArchivosCoincidentes.Count > 0)
+                    {
+                        Console.WriteLine("Archivos asociados al DPI " + dpi + ":");
+                        foreach (string nombreArchivo in nombresArchivosCoincidentes)
+                        {
+                            Console.WriteLine(nombreArchivo);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("No se encontraron archivos asociados al DPI " + dpi + ".");
+                    }
+
+
+                    //CIFRAR
+                    if (!Directory.Exists(carpetaOutput))
+                    {
+                        Directory.CreateDirectory(carpetaOutput);
+                    }
+
+                    foreach (string nombreArchivo in nombresArchivos)
+                    {
+                        string nombreArchivoSinRuta = Path.GetFileName(nombreArchivo);
+
+                        if (nombreArchivoSinRuta.Contains("-" + dpi + "-"))
+                        {
+                            string contenidoOriginal = File.ReadAllText(nombreArchivo);
+
+                            // Cifrar el contenido (implementa tu algoritmo de cifrado)
+                            string contenidoCifrado = CifrarContenido(contenidoOriginal);
+
+                            // Crear el nuevo nombre del archivo cifrado
+                            string nuevoNombreArchivoCifrado = nombreArchivoSinRuta.Replace("REC-", "CIF-");
+                            string rutaArchivoCifrado = Path.Combine(carpetaOutput, nuevoNombreArchivoCifrado);
+
+                            // Guardar el contenido cifrado en el nuevo archivo
+                            File.WriteAllText(rutaArchivoCifrado, contenidoCifrado);
+
+                            Console.WriteLine("Archivo cifrado y guardado como: " + nuevoNombreArchivoCifrado);
+                        }
+                    }
+
+                    Console.WriteLine("Proceso de cifrado completo.");
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    Console.WriteLine("La carpeta no existe.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
+
                 if (resultados.Count == 0)
                 {
                     Console.WriteLine("No se encontraron resultados para el dpi: " + dpi);
@@ -186,8 +256,10 @@ namespace Lab1_Estructura2
                 else
                 {
                     Console.WriteLine("Que desea hacer?");
-                    Console.WriteLine("1.Codificacion");
-                    Console.WriteLine("2.Decodificacion");
+                    Console.WriteLine("1.Codificacion de companies");
+                    Console.WriteLine("2.Decodificacion de companies");
+                    Console.WriteLine("3.Cifrar cartas");
+                    Console.WriteLine("4.Descifrar cartas");
                     int action = Convert.ToInt32(Console.ReadLine());
                     if (action == 1)
                     {
@@ -217,7 +289,7 @@ namespace Lab1_Estructura2
                         Console.WriteLine("Accion lo valida");
                     }
                 }
-                Console.WriteLine("--------------------------------------------------------------------");
+                Console.WriteLine("-------------------------------------------------------------------------------");
             }
             Console.ReadKey();
         }
