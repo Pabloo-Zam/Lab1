@@ -127,9 +127,49 @@ namespace Lab1_Estructura2
 
         static string CifrarContenido(string contenido)
         {
-            // Lógica de cifrado aquí
-            // Implementa tu algoritmo de cifrado personalizado
-            return contenido; // En este ejemplo, no se realiza ningún cifrado
+            // Longitud de la clave de cifrado (número de columnas)
+            int claveLongitud = 5; // Puedes ajustar este valor según tus necesidades
+
+            // Calcular el número de filas necesario para acomodar el contenido
+            int filas = (int)Math.Ceiling((double)contenido.Length / claveLongitud);
+
+            // Crear una matriz para almacenar el contenido cifrado
+            char[,] matriz = new char[filas, claveLongitud];
+
+            // Inicializar la matriz con espacios en blanco
+            for (int i = 0; i < filas; i++)
+            {
+                for (int j = 0; j < claveLongitud; j++)
+                {
+                    matriz[i, j] = ' ';
+                }
+            }
+
+            // Rellenar la matriz con el contenido original
+            int indice = 0;
+            for (int i = 0; i < filas; i++)
+            {
+                for (int j = 0; j < claveLongitud; j++)
+                {
+                    if (indice < contenido.Length)
+                    {
+                        matriz[i, j] = contenido[indice++];
+                    }
+                }
+            }
+
+            // Construir el contenido cifrado leyendo la matriz por columnas
+            StringBuilder contenidoCifrado = new StringBuilder(contenido.Length);
+            for (int j = 0; j < claveLongitud; j++)
+            {
+                for (int i = 0; i < filas; i++)
+                {
+                    contenidoCifrado.Append(matriz[i, j]);
+                }
+            }
+
+            return contenidoCifrado.ToString();
+
         }
         static void Main(string[] args)
         {
@@ -137,7 +177,7 @@ namespace Lab1_Estructura2
             Arbol arbol = new Arbol();
             List<string> companies = new List<string>();
             string carpeta = @"D:\Desktop\2do ciclo 2023\Estructura de datos II\inputs";
-            string carpetaOutput = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\Output";
+            string carpetaOutput = @"D:\Desktop\Output";
 
             string csvFilePath = "D:\\Desktop\\2do ciclo 2023\\Estructura de datos II\\input2.csv";
 
@@ -189,9 +229,14 @@ namespace Lab1_Estructura2
                 try
                 {
                     List<string> nombresArchivos = Directory.GetFiles(carpeta, "*.txt")
-                    .Select(Path.GetFileName)
+
                     .ToList();
 
+                    foreach (string rutaArchivo in nombresArchivos)
+                    {
+                        string nombreArchivoSinRuta = Path.GetFileName(rutaArchivo);
+                        
+                    }
                     List<string> nombresArchivosCoincidentes = nombresArchivos
                 .Where(nombreArchivo => nombreArchivo.Contains("-" + dpi + "-"))
                 .ToList();
