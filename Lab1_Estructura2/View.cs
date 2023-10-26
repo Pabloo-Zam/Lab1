@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using System.IO;
 using System.Runtime.Remoting.Messaging;
 using Microsoft.Win32;
+using System.Security.Claims;
 
 namespace Lab1_Estructura2
 {
@@ -124,7 +125,7 @@ namespace Lab1_Estructura2
                 Console.WriteLine("Error al decodificar las companies: " + ex.Message);
             }
         }
-
+        //CIFRADO
         static string CifrarContenido(string contenido)
         {
             // Longitud de la clave de cifrado (número de columnas)
@@ -171,6 +172,40 @@ namespace Lab1_Estructura2
             return contenidoCifrado.ToString();
 
         }
+
+        //DESCIFRADO
+        static string DescifrarContenido(string contenidoCifrado)
+        {
+            int claveLongitud = 5; // Asegúrate de que este valor coincida con la longitud de la clave utilizada en el cifrado
+
+            int filas = (int)Math.Ceiling((double)contenidoCifrado.Length / claveLongitud);
+            char[,] matriz = new char[filas, claveLongitud];
+
+            // Construir la matriz a partir del contenido cifrado
+            int indice = 0;
+            for (int j = 0; j < claveLongitud; j++)
+            {
+                for (int i = 0; i < filas; i++)
+                {
+                    if (indice < contenidoCifrado.Length)
+                    {
+                        matriz[i, j] = contenidoCifrado[indice++];
+                    }
+                }
+            }
+
+            // Construir el contenido descifrado leyendo la matriz por filas
+            StringBuilder contenidoDescifrado = new StringBuilder(contenidoCifrado.Length);
+            for (int i = 0; i < filas; i++)
+            {
+                for (int j = 0; j < claveLongitud; j++)
+                {
+                    contenidoDescifrado.Append(matriz[i, j]);
+                }
+            }
+
+            return contenidoDescifrado.ToString().Trim(); // Puedes eliminar los espacios en blanco finales
+        }
         static void Main(string[] args)
         {
             // Crea un árbol AVL
@@ -178,6 +213,8 @@ namespace Lab1_Estructura2
             List<string> companies = new List<string>();
             string carpeta = @"D:\Desktop\2do ciclo 2023\Estructura de datos II\inputs";
             string carpetaOutput = @"D:\Desktop\Output";
+            string carpetaOutput2 = @"D:\Desktop\Output2";
+
 
             string csvFilePath = "D:\\Desktop\\2do ciclo 2023\\Estructura de datos II\\input2.csv";
 
@@ -226,6 +263,7 @@ namespace Lab1_Estructura2
 
                 List<UsuarioModel> resultados = arbol.BuscarPorDPI(dpi);
 
+            //IMPLEMENTACION CIFRAR
                 try
                 {
                     List<string> nombresArchivos = Directory.GetFiles(carpeta, "*.txt")
@@ -293,7 +331,46 @@ namespace Lab1_Estructura2
                 {
                     Console.WriteLine("Error: " + ex.Message);
                 }
+                //IMPLEMENTACION DESCIFRAR
+                try
+                {
+                    List<string> nombresArchivosCifrados = Directory.GetFiles(carpetaOutput, "*CIF*.txt")
+                        .ToList();
 
+                    foreach (string nombreArchivoCifrado in nombresArchivosCifrados)
+                    {
+                        string nombreArchivoSinRuta = Path.GetFileName(nombreArchivoCifrado);
+
+                        if (nombreArchivoSinRuta.Contains("-" + dpi + "-"))
+                        {
+                            string contenidoCifrado = File.ReadAllText(nombreArchivoCifrado);
+
+                            // Descifrar el contenido (implementa tu algoritmo de descifrado)
+                            string contenidoDescifrado = DescifrarContenido(contenidoCifrado);
+
+                            // Crear el nuevo nombre del archivo descifrado
+                            string nuevoNombreArchivoDescifrado = nombreArchivoSinRuta.Replace("CIF-", "DESCIF-");
+                            string rutaArchivoDescifrado = Path.Combine(carpetaOutput2, nuevoNombreArchivoDescifrado);
+
+                            // Guardar el contenido descifrado en el nuevo archivo
+                            File.WriteAllText(rutaArchivoDescifrado, contenidoDescifrado);
+
+                            Console.WriteLine("Archivo descifrado y guardado como: " + nuevoNombreArchivoDescifrado);
+                        }
+                    }
+
+                    Console.WriteLine("Proceso de descifrado completo.");
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    Console.WriteLine("La carpeta no existe.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
+
+                //
                 if (resultados.Count == 0)
                 {
                     Console.WriteLine("No se encontraron resultados para el dpi: " + dpi);
@@ -328,6 +405,41 @@ namespace Lab1_Estructura2
 
                             // Decodificar y mostrar las companies
                             DecodificarCompanies(usuario);
+                        }
+                    }
+                    else if (action == 3)
+                    {
+                        string[] nombresArchivosCifrados = Directory.GetFiles(carpetaOutput, "CIF-*.txt");
+
+                        foreach (string rutaArchivoCifrado in nombresArchivosCifrados)
+                        {
+                            string nombreArchivoSinRuta = Path.GetFileName(rutaArchivoCifrado);
+
+                            if (nombreArchivoSinRuta.Contains("-" + dpi + "-"))
+                            {
+                                string contenidoCifrado = File.ReadAllText(rutaArchivoCifrado);
+                                Console.WriteLine("Contenido del archivo cifrado " + nombreArchivoSinRuta + ":");
+                                Console.WriteLine(contenidoCifrado);
+                                Console.WriteLine("---------------------------------------------------------------");
+                            }
+                        }
+                    }
+                    else if (action == 4)
+                    {
+                        string[] nombresArchivosDescifrados = Directory.GetFiles(carpetaOutput2, "DESCIF-*.txt");
+
+                        foreach (string rutaArchivoDescifrado in nombresArchivosDescifrados)
+                        {
+                            string nombreArchivoSinRuta = Path.GetFileName(rutaArchivoDescifrado);
+
+                            if (nombreArchivoSinRuta.Contains("-" + dpi + "-"))
+                            {
+                                string contenidoDescifrado = File.ReadAllText(rutaArchivoDescifrado);
+
+                                Console.WriteLine("Contenido del archivo descifrado " + nombreArchivoSinRuta + ":");
+                                Console.WriteLine(contenidoDescifrado);
+                                Console.WriteLine("---------------------------------------------------------------");
+                            }
                         }
                     }
                     else {
