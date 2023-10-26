@@ -9,6 +9,9 @@ using System.IO;
 using System.Runtime.Remoting.Messaging;
 using Microsoft.Win32;
 using System.Security.Claims;
+using System.Numerics;
+using System.Security.Cryptography;
+
 
 namespace Lab1_Estructura2
 {
@@ -20,6 +23,7 @@ namespace Lab1_Estructura2
 
     public class View
     {
+
         //public static string jsonData;
         public static Arbol arbol = new Arbol();
         static List<UsuarioModel> lista = new List<UsuarioModel>();
@@ -205,6 +209,71 @@ namespace Lab1_Estructura2
             }
 
             return contenidoDescifrado.ToString().Trim(); // Puedes eliminar los espacios en blanco finales
+        }
+        static RandomNumberGenerator rng = RandomNumberGenerator.Create();
+
+        //GENERAR NUMEROS PRIMOS
+        static Random random = new Random();
+
+        static bool IsPrime(BigInteger number, int witnessCount)
+        {
+            if (number <= 1)
+                return false;
+            if (number <= 3)
+                return true;
+
+            BigInteger d = number - 1;
+            int s = 0;
+            while (d % 2 == 0)
+            {
+                d /= 2;
+                s++;
+            }
+
+            for (int i = 0; i < witnessCount; i++)
+            {
+                BigInteger a = RandomBigInteger(2, number - 2);
+                BigInteger x = BigInteger.ModPow(a, d, number);
+
+                if (x == 1 || x == number - 1)
+                    continue;
+
+                for (int r = 1; r < s; r++)
+                {
+                    x = BigInteger.ModPow(x, 2, number);
+                    if (x == 1)
+                        return false;
+                    if (x == number - 1)
+                        break;
+                }
+
+                if (x != number - 1)
+                    return false;
+            }
+
+            return true;
+        }
+
+        static BigInteger RandomBigInteger(BigInteger min, BigInteger max)
+        {
+            byte[] data = new byte[max.ToByteArray().LongLength];
+            BigInteger value;
+            do
+            {
+                random.NextBytes(data);
+                value = new BigInteger(data);
+            } while (value < min || value >= max);
+            return value;
+        }
+
+        static BigInteger GeneratePrime(int bitLength)
+        {
+            BigInteger prime;
+            do
+            {
+                prime = RandomBigInteger(BigInteger.One << (bitLength - 1), BigInteger.One << bitLength);
+            } while (!IsPrime(prime, 5));
+            return prime;
         }
         static void Main(string[] args)
         {
